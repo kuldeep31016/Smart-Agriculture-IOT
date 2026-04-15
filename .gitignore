@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Environment variables (keep secrets local)
+.env
+.env.local
+.env.*.local
+
+# Logs
+sensor_log.csv
+*.log
+npm-debug.log*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Build output
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Firebase credentials (never commit these)
+serviceAccountKey.json
