@@ -6,7 +6,8 @@ const NAV_LINKS = [
   { to: '/dashboard',    label: 'Dashboard'    },
   { to: '/ai-assistant', label: 'AI Assistant' },
   { to: '/predictions',  label: '🔮 AI Predictions' },
-  { to: '/alerts',       label: 'Alerts'       },
+  { to: '/alerts',          label: 'Alerts'             },
+  { to: '/farmer-insights', label: '🧑‍🌾 Farmer Insights' },
 ];
 
 export default function Navbar() {
