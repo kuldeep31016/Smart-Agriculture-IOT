@@ -3,9 +3,11 @@
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001';
 
-// Fetch last N sensor readings (returns array, newest first)
-export async function getSensorData(limit = 20) {
-  const res = await fetch(`${BACKEND}/api/sensor-data?limit=${limit}`, {
+// Fetch sensor readings (returns array, newest first)
+// If limit is omitted, backend default limit is used.
+export async function getSensorData(limit) {
+  const query = Number.isFinite(limit) ? `?limit=${limit}` : '';
+  const res = await fetch(`${BACKEND}/api/sensor-data${query}`, {
     cache:   'no-store',
     headers: { 'Cache-Control': 'no-cache' },
   });
