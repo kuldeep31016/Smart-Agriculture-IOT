@@ -24,7 +24,25 @@ const IMAGES = {
 
 export default function Landing() {
   const sliderRef = useRef(null);
+  const farmingRef = useRef(null);
   const [susPracticeIdx, setSusPracticeIdx] = useState(0);
+
+  const scrollFarmingLeft = () => {
+    if (farmingRef.current) farmingRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+  };
+
+  const scrollFarmingRight = () => {
+    if (farmingRef.current) farmingRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+  };
+
+  const FARMING_EASY_CARDS = [
+    { label: "Farmer Approach", img: "/images/image8.jpg" },
+    { label: "Smart Technology", img: "/images/image9.jpg" },
+    { label: "More Yield", img: "/images/image10.jpg" },
+    { label: "Resource Management", img: "/images/image11.jpg" },
+    { label: "Data Insights", img: "/images/image15.jpg" },
+    { label: "Automated Crop", img: "/images/image16.jpg" }
+  ];
 
   const susImages = [
     "/images/image7.jpeg",
@@ -69,9 +87,9 @@ export default function Landing() {
         </div>
         <Link
           to="/dashboard"
-          className="hidden md:inline-flex px-5 py-2.5 rounded-xl bg-white text-black font-semibold text-sm hover:scale-105 transition-transform"
+          className="hidden md:inline-flex px-6 py-2.5 rounded-full bg-[#fde047] text-black font-bold text-sm tracking-wide hover:scale-105 transition-transform shadow-md hover:bg-[#facc15]"
         >
-          Sign In
+          Start Free Trial
         </Link>
       </nav>
 
@@ -149,7 +167,7 @@ export default function Landing() {
       </section>
 
       {/* ── Section 2: Overview ───────────────────── */}
-      <section className="max-w-7xl mx-auto px-6 py-16 pb-8">
+      <section className="max-w-7xl mx-auto px-6 pt-16 pb-24 lg:pb-32">
         <div className="grid lg:grid-cols-[1fr_2.5fr] gap-16 item-start">
 
           <div className="flex flex-col">
@@ -271,7 +289,7 @@ export default function Landing() {
               <img
                 key={src}
                 src={src}
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${i === susPracticeIdx ? 'opacity-100 z-0' : 'opacity-0 -z-10'} group-hover:scale-105`}
+                className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-in-out ${i === susPracticeIdx ? 'opacity-100 z-0' : 'opacity-0 -z-10'} group-hover:scale-105`}
                 alt=""
               />
             ))}
@@ -309,55 +327,122 @@ export default function Landing() {
                 We provide comprehensive innovative solutions tailored to address the unique challenges faced by modern farmers today.
               </p>
 
-              <div className="flex gap-4 justify-end -mt-16 relative z-10">
-                <button className="w-14 h-14 rounded-full border border-gray-200 bg-white flex items-center justify-center hover:bg-gray-50 transition-colors shadow-sm">
+              <div className="flex gap-4 justify-end -mt-16 relative z-10 w-full pr-6">
+                <button
+                  onClick={scrollFarmingLeft}
+                  className="w-12 h-12 md:w-14 md:h-14 rounded-full border border-gray-200 bg-white flex items-center justify-center hover:bg-gray-50 transition-colors shadow-sm"
+                >
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                 </button>
-                <button className="w-14 h-14 rounded-full bg-[#fde047] text-black flex items-center justify-center hover:bg-[#facc15] shadow-sm transition-colors">
+                <button
+                  onClick={scrollFarmingRight}
+                  className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#fde047] text-black flex items-center justify-center hover:bg-[#facc15] shadow-sm transition-colors"
+                >
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                 </button>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-6 flex-1">
-              {/* Box 1 */}
-              <div className="flex flex-col min-h-[250px]">
-                <div className="bg-[#1a472a] text-white rounded-2xl py-3 px-2 text-center font-semibold text-xs lg:text-sm mb-4 shadow-md leading-tight">Farmer Approach</div>
-                <div className="relative flex-1 rounded-3xl overflow-hidden shadow-lg border border-gray-100">
-                  <img src="/images/image8.jpg" className="absolute inset-0 w-full h-full object-cover" alt="" />
-                </div>
-              </div>
-
-              {/* Box 2 */}
-              <div className="flex flex-col min-h-[250px]">
-                <div className="bg-[#1a472a] text-white rounded-2xl py-3 px-2 text-center font-semibold text-xs lg:text-sm mb-4 shadow-md leading-tight">Smart Technology</div>
-                <div className="relative flex-1 rounded-3xl overflow-hidden mt-6 shadow-lg border border-gray-100">
-                  <img src="/images/image9.jpg" className="absolute inset-0 w-full h-full object-cover" alt="" />
-                </div>
-              </div>
-
-              {/* Box 3 */}
-              <div className="flex flex-col min-h-[250px]">
-                <div className="relative flex-1 rounded-3xl overflow-hidden mb-4 shadow-lg border border-gray-100">
-                  <img src="/images/image10.jpg" className="absolute inset-0 w-full h-full object-cover" alt="" />
-                </div>
-                <div className="bg-[#1a472a] text-white rounded-2xl py-3 px-2 text-center font-semibold text-xs lg:text-sm shadow-md leading-tight">More Yield</div>
+            <div className="relative -mx-6 px-6 lg:mx-0 lg:px-0 mt-6 flex-1 max-w-[100vw]">
+              <div
+                ref={farmingRef}
+                className="flex gap-6 overflow-x-auto overflow-y-hidden snap-x snap-mandatory pb-8 hide-scrollbar w-full"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {FARMING_EASY_CARDS.map((card, idx) => (
+                  <div key={idx} className="relative flex-shrink-0 w-56 md:w-64 min-h-[300px] h-[360px] rounded-3xl overflow-hidden shadow-lg border border-gray-100 group snap-start cursor-pointer">
+                    <img
+                      src={card.img}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                      alt={card.label}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out pointer-events-none"></div>
+                    <div className="absolute inset-x-0 bottom-0 p-5 translate-y-6 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out z-10 pointer-events-none">
+                      <div className="bg-[#1a472a] text-white rounded-2xl py-3 px-4 text-center font-semibold text-sm shadow-xl">
+                        {card.label}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
           </div>
         </div>
       </section>
+      {/* ── Section 5: Call to Action ──────────────────────────── */}
+      <section className="relative py-32 overflow-hidden bg-[#e0f2fe] rounded-t-[3rem]">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-white/70 to-transparent z-10 pointer-events-none"></div>
+          <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2670" className="absolute inset-0 w-full h-full object-cover object-bottom" alt="" />
+        </div>
+        <div className="relative z-20 max-w-4xl mx-auto px-6 text-center">
+          <h2 className="text-[2.75rem] md:text-[3.5rem] font-bold text-gray-900 mb-6 tracking-tight leading-[1.1] drop-shadow-sm">
+            Smarter Technology. Bigger Yields <br /> Greater Success.
+          </h2>
+          <p className="text-lg md:text-xl text-gray-800 font-medium mb-12 max-w-2xl mx-auto drop-shadow-md">
+            Join thousands of farmers using modern solutions to grow more with less.
+          </p>
+          <Link to="/dashboard" className="inline-flex items-center gap-3 bg-[#fde047] text-black px-8 py-4 rounded-full font-bold text-lg hover:scale-105 shadow-2xl hover:bg-[#facc15] transition-all">
+            Start Free Trial
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17l9.2-9.2M17 17V7H7" /></svg>
+          </Link>
+        </div>
+      </section>
 
       {/* ── Footer ────────────────────────────────────────────────────────────── */}
-      <footer className="bg-[#111] text-white py-12 text-center">
-        <h2 className="text-3xl font-bold mb-8">Ready to monitor your farm?</h2>
-        <div className="flex flex-wrap justify-center gap-4">
-          <Link to="/dashboard" className="px-8 py-4 rounded-xl bg-[#fde047] text-black font-semibold hover:bg-[#facc15] transition-colors">Go to Dashboard</Link>
-          <Link to="/ai-assistant" className="px-8 py-4 rounded-xl bg-white/10 font-semibold hover:bg-white/20 transition-colors border border-white/20">AI Assistant</Link>
-          <Link to="/predictions" className="px-8 py-4 rounded-xl bg-white/10 font-semibold hover:bg-white/20 transition-colors border border-white/20">Predictions</Link>
+      <footer className="bg-[#111] text-white pt-24 pb-12 rounded-t-[2.5rem] -mt-8 relative z-30">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 gap-y-16 mb-16">
+
+            <div className="col-span-1 md:col-span-1">
+              <h3 className="text-2xl font-bold mb-6 tracking-tight text-white flex items-center gap-2">
+                <span className="text-[#fde047]">🌱</span> AgriSense
+              </h3>
+              <p className="text-white/60 text-sm leading-relaxed mb-6 max-w-xs">
+                Pioneering the future of agriculture with smart sensing, AI predictions, and intelligent resource management.
+              </p>
+              <div className="flex flex-col gap-3">
+                <span className="text-[#fde047] text-sm font-medium cursor-pointer hover:underline">support@agrisense.com</span>
+                <span className="text-[#fde047] text-sm font-medium flex items-center gap-2 cursor-pointer hover:underline">
+                  +1 (555) 123-4567
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <h4 className="text-lg font-semibold text-white/90 mb-2">Solutions</h4>
+              <Link to="/predictions" className="text-white/50 text-sm hover:text-white transition-colors">Crop Prediction</Link>
+              <Link to="/alerts" className="text-white/50 text-sm hover:text-white transition-colors">Smart Irrigation</Link>
+              <Link to="/alerts" className="text-white/50 text-sm hover:text-white transition-colors">Disease Detection</Link>
+              <Link to="/predictions" className="text-white/50 text-sm hover:text-white transition-colors">Yield Optimization</Link>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <h4 className="text-lg font-semibold text-white/90 mb-2">Platform</h4>
+              <Link to="/dashboard" className="text-white/50 text-sm hover:text-white transition-colors">Dashboard View</Link>
+              <Link to="/ai-assistant" className="text-white/50 text-sm hover:text-white transition-colors">AI Assistant Central</Link>
+              <Link to="/alerts" className="text-white/50 text-sm hover:text-white transition-colors">Real-time Weather</Link>
+              <Link to="/dashboard" className="text-white/50 text-sm hover:text-white transition-colors">Sensor Analytics</Link>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <h4 className="text-lg font-semibold text-white/90 mb-2">Company</h4>
+              <Link to="#" className="text-white/50 text-sm hover:text-white transition-colors">About Us</Link>
+              <Link to="#" className="text-white/50 text-sm hover:text-white transition-colors">Careers</Link>
+              <Link to="#" className="text-white/50 text-sm hover:text-white transition-colors">Farm Blog</Link>
+              <Link to="#" className="text-white/50 text-sm hover:text-white transition-colors">Contact</Link>
+            </div>
+          </div>
+
+          <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-white/40 text-sm">© {new Date().getFullYear()} AgriSense Technologies. All rights reserved.</p>
+            <div className="flex items-center gap-6">
+              <Link to="#" className="text-white/40 text-sm hover:text-white transition-colors">Privacy Policy</Link>
+              <Link to="#" className="text-white/40 text-sm hover:text-white transition-colors">Terms of Service</Link>
+            </div>
+          </div>
         </div>
-        <p className="text-gray-500 mt-12 text-sm">© {new Date().getFullYear()} AgriSense. All rights reserved.</p>
       </footer>
 
     </div>
