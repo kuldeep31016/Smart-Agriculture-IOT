@@ -1,8 +1,7 @@
-// Agriculture Fallback Q&A — used when Gemini API is unavailable
-// Covers greetings + 30+ common agriculture topics asked by Indian farmers
-// Keyword-based matching: finds best answer based on words in user's message
+// Agriculture Fallback Q&A
+// Used when Gemini API is unavailable (quota exceeded, network error, etc.)
+// Tone: formal, professional, minimal emojis — like a knowledgeable agronomist
 
-// ── Greeting detection ────────────────────────────────────────────────────────
 const GREETING_WORDS = [
   'hi', 'hello', 'hey', 'namaste', 'namaskar', 'helo', 'hii', 'hiii',
   'good morning', 'good afternoon', 'good evening', 'good night',
@@ -10,572 +9,468 @@ const GREETING_WORDS = [
 ];
 
 const GREETING_RESPONSE =
-  `Hello! 👋 I'm AgriSense AI, your smart farming assistant!\n\n` +
-  `I can help you with:\n` +
-  `• 🌾 Crop recommendations (Kharif, Rabi, Zaid seasons)\n` +
-  `• 💊 Fertilizer advice (NPK, Urea, DAP, organic)\n` +
-  `• 💧 Irrigation scheduling and drip irrigation tips\n` +
-  `• 🦠 Disease and pest identification\n` +
-  `• 🌱 Soil health and preparation\n` +
-  `• 📊 Understanding your sensor data\n\n` +
-  `Ask me anything about your farm — in English or Hindi!`;
-
-// ── Comprehensive Q&A database ────────────────────────────────────────────────
-// Each entry: tags (keywords to match), answer (response text)
+  `Hello! I am AgriSense AI, your smart farming assistant.\n\n` +
+  `I can help you with the following topics:\n` +
+  `- Crop recommendations by season (Kharif, Rabi, Zaid)\n` +
+  `- Fertilizer advice (NPK, Urea, DAP, organic inputs)\n` +
+  `- Irrigation scheduling and water management\n` +
+  `- Plant disease identification and prevention\n` +
+  `- Soil health, pH management, and preparation\n` +
+  `- Post-harvest handling and storage\n` +
+  `- Government schemes and subsidies\n\n` +
+  `Please type your question and I will assist you.`;
 
 const QA = [
 
-  // ── Seasons ─────────────────────────────────────────────────────────────────
+  // ── Seasons ──────────────────────────────────────────────────────────────────
   {
     tags: ['kharif', 'monsoon', 'rainy season', 'rainy', 'rain season', 'june', 'july', 'august', 'september'],
     answer:
-      `🌧️ **Kharif Season Crops (June – October)**\n\n` +
-      `Best crops to grow during monsoon/rainy season:\n\n` +
-      `• **Rice (Paddy)** — Needs high water, temp 25–35°C. Best in low-lying fields.\n` +
-      `• **Maize (Corn)** — Well-drained soil, moderate rainfall.\n` +
-      `• **Cotton** — Warm climate, needs 500–700mm rain.\n` +
-      `• **Soybean** — Black/red soil, good for oil and protein.\n` +
-      `• **Groundnut** — Sandy loam soil, good drainage.\n` +
-      `• **Bajra (Pearl Millet)** — Drought-tolerant, light soil.\n` +
-      `• **Sugarcane** — Heavy rainfall, grows year-round.\n` +
-      `• **Arhar (Tur Dal)** — Rain-fed conditions, poor soil.\n\n` +
-      `💡 Tip: Ensure proper drainage to prevent waterlogging during heavy rains.`,
+      `Kharif Season (June – October)\n\n` +
+      `Kharif crops are sown at the onset of the monsoon and harvested in autumn. Recommended crops:\n\n` +
+      `- Rice (Paddy): Requires standing water and temperatures of 25–35°C.\n` +
+      `- Maize: Grows well in well-drained soil with moderate rainfall.\n` +
+      `- Cotton: Needs warm climate and 500–700 mm of rainfall.\n` +
+      `- Soybean: Suitable for black and red soils.\n` +
+      `- Groundnut: Prefers sandy loam soil with good drainage.\n` +
+      `- Bajra (Pearl Millet): Drought-tolerant; grows well in light soils.\n` +
+      `- Sugarcane: Requires heavy rainfall and a long growing season.\n` +
+      `- Arhar (Tur Dal): Well-suited for rain-fed and low-fertility soils.\n\n` +
+      `Important: Ensure proper field drainage before sowing to prevent waterlogging during heavy rainfall events.`,
   },
 
   {
     tags: ['rabi', 'winter', 'winter season', 'november', 'december', 'january', 'february', 'winter crop', 'sardi'],
     answer:
-      `❄️ **Rabi Season Crops (November – March)**\n\n` +
-      `Best crops to grow in winter season:\n\n` +
-      `• **Wheat** — India's most important rabi crop. Temp 10–25°C.\n` +
-      `• **Mustard (Sarson)** — Cold-tolerant, oil crop. Low water need.\n` +
-      `• **Gram (Chickpea)** — Dry, cool weather. Best in black soil.\n` +
-      `• **Barley** — Drought-resistant, good for poor soils.\n` +
-      `• **Lentil (Masoor)** — Very low water requirement.\n` +
-      `• **Peas** — Cool weather, frost-sensitive. Quick crop.\n` +
-      `• **Potato** — Ideal temp 15–25°C. Avoid waterlogging.\n` +
-      `• **Sunflower** — Good oil yield in moderate cold.\n\n` +
-      `💡 Tip: Irrigate wheat at Crown Root Initiation stage (21 days after sowing).`,
+      `Rabi Season (November – March)\n\n` +
+      `Rabi crops are sown after the monsoon retreats and harvested in spring. Recommended crops:\n\n` +
+      `- Wheat: The most important rabi crop. Optimal temperature: 10–25°C.\n` +
+      `- Mustard (Sarson): Cold-tolerant oil crop with low water requirement.\n` +
+      `- Gram (Chickpea): Grows well in dry, cool conditions on black soil.\n` +
+      `- Barley: Drought-resistant and suitable for poor soils.\n` +
+      `- Lentil (Masoor): Very low water requirement; good for small farmers.\n` +
+      `- Peas: Requires cool weather; sensitive to frost after flowering.\n` +
+      `- Potato: Ideal temperature range is 15–25°C. Avoid waterlogging.\n\n` +
+      `Key practice: For wheat, the first irrigation at the Crown Root Initiation (CRI) stage — 21 days after sowing — is the most critical for yield.`,
   },
 
   {
     tags: ['zaid', 'summer', 'summer season', 'march', 'april', 'may', 'grishma', 'garmi', 'hot season'],
     answer:
-      `☀️ **Zaid Season Crops (March – June)**\n\n` +
-      `Best crops to grow in summer season:\n\n` +
-      `• **Watermelon** — High temp, sandy soil, low water.\n` +
-      `• **Muskmelon** — Warm, dry climate ideal.\n` +
-      `• **Cucumber** — Quick crop, 45–50 days.\n` +
-      `• **Bitter Gourd (Karela)** — Heat-tolerant vegetable.\n` +
-      `• **Moong Dal (Green Gram)** — Short duration, heat-tolerant.\n` +
-      `• **Fodder Crops (Cowpea)** — For cattle feed.\n` +
-      `• **Sunflower** — Grows well in summer too.\n\n` +
-      `💡 Tip: Mulching in summer reduces soil temperature and conserves 30–40% water.`,
+      `Zaid Season (March – June)\n\n` +
+      `Zaid crops are grown during the short summer period between Rabi harvest and Kharif sowing.\n\n` +
+      `- Watermelon: High temperature tolerance; grows well in sandy soil.\n` +
+      `- Muskmelon: Prefers warm, dry climate.\n` +
+      `- Cucumber: Short duration crop (45–50 days).\n` +
+      `- Bitter Gourd (Karela): Heat-tolerant; suitable for summer cultivation.\n` +
+      `- Moong Dal (Green Gram): Short duration and heat-tolerant legume.\n` +
+      `- Fodder Crops (Cowpea): Grown for livestock feed during summer months.\n\n` +
+      `Key practice: Apply mulch (straw or plastic) to reduce soil temperature and conserve 30–40% water during the hot months.`,
   },
 
-  // ── Specific Crops ───────────────────────────────────────────────────────────
+  // ── Specific Crops ────────────────────────────────────────────────────────────
   {
     tags: ['rice', 'paddy', 'dhan', 'chawal'],
     answer:
-      `🌾 **Rice (Paddy) Cultivation Guide**\n\n` +
-      `• **Season:** Kharif (June–November)\n` +
-      `• **Temperature:** 25–35°C for germination, 20–27°C at harvest\n` +
-      `• **Water:** Needs 1200–1800mm water per season. Keep 5cm standing water.\n` +
-      `• **Soil:** Clayey loam, well-puddled field.\n\n` +
-      `**Fertilizer Schedule:**\n` +
-      `• Basal: DAP 50kg/acre + MOP 25kg/acre at transplanting\n` +
-      `• 21 days: Urea 25kg/acre\n` +
-      `• 42 days: Urea 25kg/acre\n\n` +
-      `**Common Diseases:**\n` +
-      `• Blast disease → Apply Tricyclazole\n` +
-      `• Brown Plant Hopper → Drain water, apply Imidacloprid\n\n` +
-      `💡 SRI method (System of Rice Intensification) can increase yield by 20–50%.`,
+      `Rice (Paddy) Cultivation Guide\n\n` +
+      `Season: Kharif (June – November)\n` +
+      `Temperature: 25–35°C for germination; 20–27°C at maturity\n` +
+      `Water requirement: 1200–1800 mm per season. Maintain 5 cm standing water in field.\n` +
+      `Soil: Clayey loam; field should be well-puddled before transplanting.\n\n` +
+      `Fertilizer schedule (per acre):\n` +
+      `- At transplanting (basal): DAP 50 kg + MOP 25 kg\n` +
+      `- At 21 days: Urea 25 kg\n` +
+      `- At 42 days: Urea 25 kg\n\n` +
+      `Common diseases:\n` +
+      `- Blast disease: Apply Tricyclazole 75 WP at 0.6 g/L\n` +
+      `- Brown Plant Hopper: Drain water from field; apply Imidacloprid 17.8 SL\n\n` +
+      `Note: The SRI (System of Rice Intensification) method can increase yield by 20–50% with less water.`,
   },
 
   {
     tags: ['wheat', 'gehu', 'gehun'],
     answer:
-      `🌿 **Wheat Cultivation Guide**\n\n` +
-      `• **Season:** Rabi (November–April)\n` +
-      `• **Temperature:** 10–25°C. Frost during grain filling reduces yield.\n` +
-      `• **Water:** 4–6 irrigations. Critical stages:\n` +
-      `  1. CRI (21 days) — most critical\n` +
-      `  2. Tillering (45 days)\n` +
-      `  3. Jointing (60 days)\n` +
-      `  4. Flowering (90 days)\n\n` +
-      `**Fertilizer:**\n` +
-      `• DAP 50kg/acre at sowing + Urea 50kg/acre in 3 splits\n\n` +
-      `**Varieties:** HD-2967, GW-496, PBW-550 (for North India)\n\n` +
-      `💡 Tip: Delayed sowing beyond December 15 reduces yield by 1-1.5% per day.`,
-  },
-
-  {
-    tags: ['maize', 'corn', 'makka', 'makkai', 'bhutta'],
-    answer:
-      `🌽 **Maize Cultivation Guide**\n\n` +
-      `• **Season:** Kharif + Rabi both possible\n` +
-      `• **Temperature:** 25–33°C ideal\n` +
-      `• **Soil:** Well-drained loam or sandy loam, pH 6–7.5\n` +
-      `• **Water:** 500–700mm. Sensitive to waterlogging.\n\n` +
-      `**Fertilizer:** NPK 120:60:40 kg/ha\n` +
-      `• Basal: DAP + MOP + 1/3 Urea at sowing\n` +
-      `• 30 days: 1/3 Urea\n` +
-      `• 60 days: 1/3 Urea\n\n` +
-      `**Common Pest:** Fall Armyworm → Spray Spinetoram or Emamectin Benzoate\n\n` +
-      `💡 Maize as inter-crop with legumes improves soil nitrogen naturally.`,
+      `Wheat Cultivation Guide\n\n` +
+      `Season: Rabi (November – April)\n` +
+      `Temperature: 10–25°C. Frost during grain filling stage significantly reduces yield.\n\n` +
+      `Critical irrigation stages:\n` +
+      `1. CRI stage (21 days after sowing) — most important\n` +
+      `2. Tillering (45 days)\n` +
+      `3. Jointing (60 days)\n` +
+      `4. Flowering (90 days)\n` +
+      `5. Grain filling (105 days)\n\n` +
+      `Fertilizer:\n` +
+      `- Basal: DAP 50 kg/acre at sowing\n` +
+      `- Urea: 50 kg/acre in 3 equal splits at CRI, tillering, and jointing stages\n\n` +
+      `Recommended varieties for North India: HD-2967, GW-496, PBW-550\n\n` +
+      `Note: Delayed sowing beyond December 15 reduces wheat yield by approximately 1–1.5% per day.`,
   },
 
   {
     tags: ['tomato', 'tamatar'],
     answer:
-      `🍅 **Tomato Growing Guide**\n\n` +
-      `• **Season:** All-year in greenhouse; Oct–Feb in open field\n` +
-      `• **Temperature:** 20–27°C ideal. Above 35°C drops fruits.\n` +
-      `• **Soil:** Well-drained sandy loam, pH 6–7\n\n` +
-      `**Fertilizer:**\n` +
-      `• Basal: FYM 10t/ha + NPK 120:80:80 kg/ha\n` +
-      `• Side dressing: Urea 30 days after transplanting\n\n` +
-      `**Common Problems:**\n` +
-      `• Blossom drop → Check temperature, calcium\n` +
-      `• Early blight → Apply Mancozeb\n` +
-      `• Late blight → Apply Metalaxyl\n\n` +
-      `💡 Drip irrigation + mulching increases tomato yield by 40%.`,
-  },
-
-  {
-    tags: ['onion', 'pyaaz', 'pyaj'],
-    answer:
-      `🧅 **Onion Cultivation Guide**\n\n` +
-      `• **Season:** Kharif (June), Rabi (Oct–Nov), Late Kharif (Aug)\n` +
-      `• **Temperature:** 13–24°C for bulb formation\n` +
-      `• **Soil:** Well-drained loam, pH 6–7\n\n` +
-      `**Fertilizer:** NPK 100:50:50 kg/ha\n` +
-      `• Critical: Potash improves bulb size and storability\n\n` +
-      `**Irrigation:** Drip preferred. Stop 10 days before harvest.\n\n` +
-      `**Common Disease:** Purple blotch → Apply Iprodione\n\n` +
-      `💡 Tip: Proper curing (drying) after harvest reduces storage losses by 50%.`,
+      `Tomato Cultivation Guide\n\n` +
+      `Season: October–February (open field); year-round in polyhouse\n` +
+      `Temperature: 20–27°C is optimal. Above 35°C causes flower and fruit drop.\n` +
+      `Soil: Well-drained sandy loam, pH 6.0–7.0\n\n` +
+      `Fertilizer (per hectare):\n` +
+      `- Basal: FYM 10 tonnes + NPK 120:80:80 kg\n` +
+      `- Top dressing: Urea 30 days after transplanting\n\n` +
+      `Disease management:\n` +
+      `- Blossom drop: Check for temperature stress and calcium deficiency\n` +
+      `- Early blight: Apply Mancozeb 75 WP at 2 g/L\n` +
+      `- Late blight: Apply Metalaxyl + Mancozeb at 2.5 g/L\n\n` +
+      `Note: Drip irrigation combined with plastic mulching increases tomato yield by up to 40%.`,
   },
 
   // ── Fertilizers ──────────────────────────────────────────────────────────────
   {
     tags: ['fertilizer', 'fertiliser', 'khad', 'npk', 'urea', 'dap', 'potash', 'nitrogen', 'phosphorus', 'potassium'],
     answer:
-      `💊 **Fertilizer Guide for Indian Farmers**\n\n` +
-      `**Major Fertilizers:**\n` +
-      `• **Urea (46-0-0)** — Pure nitrogen. Apply in split doses. Avoid applying before rain.\n` +
-      `• **DAP (18-46-0)** — Nitrogen + Phosphorus. Apply at sowing as basal dose.\n` +
-      `• **MOP (0-0-60)** — Muriate of Potash. Improves fruit quality and disease resistance.\n` +
-      `• **NPK 10-26-26** — Balanced for vegetables and fruits.\n` +
-      `• **SSP (0-16-0)** — Single Super Phosphate. Also contains Sulphur.\n\n` +
-      `**Golden Rule:** Apply fertilizer based on soil test for best results.\n\n` +
-      `**Deficiency Signs:**\n` +
-      `• Yellow leaves = Nitrogen deficiency → Apply Urea\n` +
-      `• Purple leaves = Phosphorus deficiency → Apply DAP\n` +
-      `• Brown leaf edges = Potassium deficiency → Apply MOP\n\n` +
-      `💡 Organic matter (FYM/compost) reduces fertilizer need by 25–30%.`,
+      `Fertilizer Guide\n\n` +
+      `Major fertilizers and their uses:\n\n` +
+      `- Urea (46-0-0): Pure nitrogen source. Apply in 2–3 split doses. Avoid application immediately before rainfall.\n` +
+      `- DAP (18-46-0): Provides nitrogen and phosphorus. Apply as a basal dose at sowing.\n` +
+      `- MOP (0-0-60): Muriate of Potash. Improves fruit quality, disease resistance, and drought tolerance.\n` +
+      `- NPK 10-26-26: Balanced formulation for vegetables and fruit crops.\n` +
+      `- SSP (0-16-0): Single Super Phosphate. Also supplies sulphur, beneficial for oilseed crops.\n\n` +
+      `Visual deficiency symptoms:\n` +
+      `- Yellow leaves (lower, older): Nitrogen deficiency → Apply Urea\n` +
+      `- Purple or reddish leaves: Phosphorus deficiency → Apply DAP\n` +
+      `- Brown or scorched leaf margins: Potassium deficiency → Apply MOP\n\n` +
+      `Recommendation: Always conduct a soil test before applying fertilizers to avoid over-application and cost wastage.`,
   },
 
   {
-    tags: ['organic', 'compost', 'vermicompost', 'jeevamrutha', 'bio fertilizer', 'organic farming', 'natural farming'],
+    tags: ['organic', 'compost', 'vermicompost', 'bio fertilizer', 'organic farming', 'natural farming', 'jeevamrutha'],
     answer:
-      `🌿 **Organic Farming & Natural Inputs**\n\n` +
-      `**Organic Fertilizers:**\n` +
-      `• **FYM (Farm Yard Manure):** Apply 10–15 tonnes/ha. NPK ratio 0.5:0.25:0.5\n` +
-      `• **Vermicompost:** 2–4 tonnes/ha. Rich in micronutrients.\n` +
-      `• **Green Manure:** Dhaincha or Sunn Hemp → plough before flowering.\n` +
-      `• **Neem Cake:** 200kg/ha. Pest repellent + nitrogen source.\n\n` +
-      `**Bio-fertilizers:**\n` +
-      `• Rhizobium → for legumes (boosts nitrogen fixation)\n` +
-      `• PSB (Phosphate Solubilizing Bacteria) → releases locked phosphorus\n` +
-      `• Azotobacter → for cereals, fixes atmospheric nitrogen\n\n` +
-      `**Jeevamrutha Recipe:**\n` +
-      `• 200L water + 10kg cow dung + 5–10L cow urine + 2kg jaggery + 2kg gram flour\n` +
-      `• Ferment 48 hours, dilute 1:10 and apply\n\n` +
-      `💡 Organic farming takes 2–3 years to stabilize but reduces input cost by 40%.`,
+      `Organic Farming and Natural Inputs\n\n` +
+      `Organic fertilizers and their application rates:\n\n` +
+      `- FYM (Farm Yard Manure): 10–15 tonnes/ha. NPK approximately 0.5:0.25:0.5.\n` +
+      `- Vermicompost: 2–4 tonnes/ha. Rich in micronutrients and beneficial organisms.\n` +
+      `- Green Manure (Dhaincha / Sunn Hemp): Plough in before flowering stage.\n` +
+      `- Neem Cake: 200 kg/ha. Acts as nitrogen source and pest deterrent.\n\n` +
+      `Bio-fertilizers:\n` +
+      `- Rhizobium: For legume crops — enhances atmospheric nitrogen fixation.\n` +
+      `- PSB (Phosphate Solubilizing Bacteria): Releases locked phosphorus in soil.\n` +
+      `- Azotobacter: For cereal crops; fixes atmospheric nitrogen.\n\n` +
+      `Jeevamrutha preparation:\n` +
+      `Mix 200 L water + 10 kg fresh cow dung + 5–10 L cow urine + 2 kg jaggery + 2 kg gram flour. Ferment for 48 hours, then dilute 1:10 and apply.\n\n` +
+      `Note: Transitioning to organic farming typically requires 2–3 seasons for soil to stabilize, but input costs reduce by 40% over time.`,
   },
 
-  // ── Irrigation ───────────────────────────────────────────────────────────────
+  // ── Irrigation ────────────────────────────────────────────────────────────────
   {
-    tags: ['irrigation', 'water', 'drip', 'sprinkler', 'irrigate', 'sinchayee', 'paani', 'pani'],
+    tags: ['irrigation', 'water', 'irrigate', 'sinchayee', 'paani', 'pani', 'when to water'],
     answer:
-      `💧 **Irrigation Guide**\n\n` +
-      `**Methods Comparison:**\n` +
-      `• **Flood Irrigation** — Cheapest, wastes 40–50% water.\n` +
-      `• **Drip Irrigation** — 90% efficiency. Saves 50–60% water. Best for fruits & vegetables.\n` +
-      `• **Sprinkler** — 75% efficiency. Good for wheat, groundnut, vegetables.\n` +
-      `• **Furrow** — Good for row crops like maize, sugarcane.\n\n` +
-      `**When to Irrigate:**\n` +
-      `• Soil moisture below 25% → Irrigate immediately\n` +
-      `• Soil moisture 25–60% → Monitor closely\n` +
-      `• Soil moisture above 60% → Do not irrigate\n\n` +
-      `**Water Requirements:**\n` +
-      `• Wheat: 4–6 irrigations, 400–500mm total\n` +
-      `• Rice: Continuous flooding or AWD method\n` +
-      `• Vegetables: Every 2–3 days via drip\n\n` +
-      `💡 Irrigate in early morning or evening — reduces evaporation by 30%.`,
+      `Irrigation Guide\n\n` +
+      `Irrigation methods and efficiency:\n\n` +
+      `- Flood irrigation: Lowest cost, but 40–50% water is wasted.\n` +
+      `- Furrow irrigation: Suitable for row crops such as maize and sugarcane.\n` +
+      `- Sprinkler irrigation: ~75% efficiency. Good for wheat, groundnut, vegetables.\n` +
+      `- Drip irrigation: ~90% efficiency. Saves 50–60% water. Best for fruits and vegetables.\n\n` +
+      `When to irrigate (based on soil moisture):\n` +
+      `- Below 25%: Irrigate immediately.\n` +
+      `- 25–40%: Schedule irrigation within 1–2 days.\n` +
+      `- 40–70%: Optimal range — no irrigation needed.\n` +
+      `- Above 70%: Do not irrigate; risk of root rot.\n\n` +
+      `Water requirement per crop (approximate):\n` +
+      `- Wheat: 400–500 mm over 4–6 irrigations\n` +
+      `- Rice: 1200–1800 mm (continuous or AWD method)\n` +
+      `- Vegetables: 25–35 mm every 2–3 days via drip\n\n` +
+      `Tip: Irrigate in early morning or evening to reduce evaporation loss by 25–30%.`,
   },
 
   {
     tags: ['drip', 'drip irrigation', 'drip system', 'trickle'],
     answer:
-      `💧 **Drip Irrigation — Complete Guide**\n\n` +
-      `**Benefits:**\n` +
-      `• Saves 50–60% water vs flood irrigation\n` +
-      `• 30–50% higher yield\n` +
-      `• Reduces weed growth\n` +
-      `• Government subsidy: 50–90% for small farmers\n\n` +
-      `**Best Crops for Drip:**\n` +
-      `Tomato, Pomegranate, Banana, Onion, Sugarcane, Cotton, Grapes\n\n` +
-      `**Installation Tips:**\n` +
-      `• Lateral spacing: 60–90cm for vegetables\n` +
-      `• Emitter flow: 2–4 LPH\n` +
-      `• Fertigation: Add soluble fertilizers through drip 3 times/week\n\n` +
-      `**Maintenance:**\n` +
-      `• Flush laterals monthly\n` +
-      `• Check filter every week\n` +
-      `• Clean emitters with 10% HCl solution if blocked\n\n` +
-      `💡 Drip with mulching saves up to 70% water — ideal for water-scarce areas.`,
+      `Drip Irrigation — Complete Guide\n\n` +
+      `Benefits:\n` +
+      `- Saves 50–60% water compared to flood irrigation.\n` +
+      `- Increases crop yield by 30–50%.\n` +
+      `- Reduces weed growth significantly.\n` +
+      `- Eligible for 50–90% government subsidy (PMKSY scheme) for small and marginal farmers.\n\n` +
+      `Best crops for drip irrigation:\n` +
+      `Tomato, Pomegranate, Banana, Onion, Sugarcane, Cotton, Grapes, Chilli\n\n` +
+      `System specifications:\n` +
+      `- Lateral spacing: 60–90 cm for vegetables\n` +
+      `- Emitter flow rate: 2–4 litres per hour\n` +
+      `- Fertigation: Inject soluble fertilizers through the drip system 3 times per week\n\n` +
+      `Maintenance:\n` +
+      `- Flush lateral lines once a month.\n` +
+      `- Inspect and clean the filter every week.\n` +
+      `- Clean blocked emitters with 10% HCl solution.\n\n` +
+      `Note: Drip irrigation combined with mulching can reduce water use by up to 70% — especially useful in water-scarce regions.`,
   },
 
-  // ── Soil ─────────────────────────────────────────────────────────────────────
+  // ── Soil ──────────────────────────────────────────────────────────────────────
   {
-    tags: ['soil', 'mitti', 'ph', 'soil health', 'soil test', 'soil type'],
+    tags: ['soil', 'mitti', 'ph', 'soil health', 'soil test', 'soil type', 'soil quality'],
     answer:
-      `🌱 **Soil Health Guide**\n\n` +
-      `**Soil pH Ranges:**\n` +
-      `• pH < 6 (Acidic) — Add lime (calcium carbonate) @ 1–2 tonnes/ha\n` +
-      `• pH 6–7.5 (Ideal) — Most crops grow well\n` +
-      `• pH > 8 (Alkaline) — Add gypsum @ 2–3 tonnes/ha\n\n` +
-      `**Soil Types in India:**\n` +
-      `• Alluvial soil → Wheat, rice, sugarcane (best fertile soil)\n` +
-      `• Black soil (Regur) → Cotton, soybean, jowar\n` +
-      `• Red soil → Groundnut, millets, tobacco\n` +
-      `• Laterite soil → Tea, coffee, cashew\n\n` +
-      `**Soil Preparation:**\n` +
-      `• Deep ploughing once in 3 years (25–30cm)\n` +
-      `• Add 10 tonnes FYM before first crop\n` +
-      `• Leave field fallow in extreme heat to kill soil-borne pests\n\n` +
-      `💡 Get soil tested every 3 years — Soil Health Card scheme is free for farmers.`,
-  },
-
-  {
-    tags: ['soil moisture', 'moisture', 'dry soil', 'wet soil', 'waterlog'],
-    answer:
-      `🌱 **Soil Moisture Management**\n\n` +
-      `**Moisture Levels:**\n` +
-      `• < 25% — Critically Dry → Irrigate immediately!\n` +
-      `• 25–40% — Low → Schedule irrigation soon\n` +
-      `• 40–70% — Optimal → Ideal for most crops\n` +
-      `• 70–85% — High → Monitor, reduce irrigation\n` +
-      `• > 85% — Waterlogged → Drain immediately\n\n` +
-      `**How to Retain Moisture:**\n` +
-      `• Mulching (straw/plastic) reduces evaporation 40–60%\n` +
-      `• Deep ploughing improves water infiltration\n` +
-      `• Contour bunding in sloped fields\n\n` +
-      `**Waterlogging Signs:**\n` +
-      `• Yellowing of lower leaves\n` +
-      `• Root rot smell from soil\n` +
-      `• Wilting despite wet soil\n\n` +
-      `💡 Mulching in summer reduces irrigation frequency by 50%.`,
+      `Soil Health and Management\n\n` +
+      `Soil pH management:\n` +
+      `- pH below 6.0 (Acidic): Apply agricultural lime (calcium carbonate) at 1–2 tonnes/ha.\n` +
+      `- pH 6.0–7.5 (Optimal): Suitable for most crops; no amendment needed.\n` +
+      `- pH above 8.0 (Alkaline/Sodic): Apply gypsum at 2–3 tonnes/ha.\n\n` +
+      `Major soil types and suitable crops in India:\n` +
+      `- Alluvial soil: Wheat, rice, sugarcane (most fertile, North Indian plains)\n` +
+      `- Black soil (Regur): Cotton, soybean, jowar (Deccan plateau)\n` +
+      `- Red soil: Groundnut, millets, tobacco (peninsular India)\n` +
+      `- Laterite soil: Tea, coffee, cashew (Western Ghats, Northeast)\n\n` +
+      `Best practices:\n` +
+      `- Deep ploughing (25–30 cm) once every 3 years breaks hardpan.\n` +
+      `- Add 10 tonnes FYM/ha before the first crop of the season.\n` +
+      `- Leave the field fallow in peak summer to kill soil-borne pathogens.\n\n` +
+      `Note: Soil Health Card testing is free for farmers under the Government of India scheme. Test your soil every 3 years.`,
   },
 
   {
-    tags: ['crop rotation', 'rotation', 'intercrop', 'mixed crop'],
+    tags: ['soil moisture', 'dry soil', 'wet soil', 'waterlog', 'waterlogging'],
     answer:
-      `🔄 **Crop Rotation & Intercropping**\n\n` +
-      `**Why Rotate Crops?**\n` +
-      `• Breaks pest and disease cycles\n` +
-      `• Improves soil nitrogen (legume rotation)\n` +
-      `• Reduces fertilizer cost by 20–30%\n\n` +
-      `**Recommended Rotations:**\n` +
-      `• Rice → Wheat → Legume (most common in North India)\n` +
-      `• Maize → Wheat → Groundnut\n` +
-      `• Cotton → Wheat → Moong\n` +
-      `• Sugarcane → Wheat → Moong\n\n` +
-      `**Good Intercropping Combos:**\n` +
-      `• Maize + Cowpea (nitrogen fixing)\n` +
-      `• Cotton + Moong (short duration legume)\n` +
-      `• Sugarcane + Potato/Onion\n` +
-      `• Coconut + Banana + Ginger\n\n` +
-      `💡 Always follow cereal crop with a legume to naturally restore soil nitrogen.`,
-  },
-
-  // ── Diseases & Pests ─────────────────────────────────────────────────────────
-  {
-    tags: ['disease', 'fungal', 'blight', 'fungus', 'rust', 'mildew', 'rot', 'leaf spot'],
-    answer:
-      `🦠 **Common Fungal Diseases & Prevention**\n\n` +
-      `**Top Fungal Diseases:**\n` +
-      `• **Late Blight** (Potato/Tomato) — Grey-brown lesions. Apply Metalaxyl+Mancozeb\n` +
-      `• **Powdery Mildew** — White powder on leaves. Apply Sulfur or Hexaconazole\n` +
-      `• **Rust** (Wheat) — Orange pustules. Apply Propiconazole\n` +
-      `• **Downy Mildew** — Yellow patches. Apply Cymoxanil\n` +
-      `• **Stem Rot** — Water-soaked lesions at stem base. Use Trichoderma\n\n` +
-      `**Preventive Measures:**\n` +
-      `• Avoid overhead irrigation when possible\n` +
-      `• Ensure good air circulation (proper spacing)\n` +
-      `• Use resistant varieties\n` +
-      `• Apply Trichoderma viride 2.5kg/ha in soil\n\n` +
-      `**High-Risk Conditions:**\n` +
-      `• Humidity > 80% + Temperature 20–25°C\n` +
-      `• Rainy weather for 3+ consecutive days\n\n` +
-      `💡 Spray Bordeaux mixture (1%) as preventive before monsoon starts.`,
+      `Soil Moisture Management\n\n` +
+      `Moisture level interpretation:\n` +
+      `- Below 25%: Critically dry. Irrigate immediately to prevent crop stress.\n` +
+      `- 25–40%: Low. Schedule irrigation within 24–48 hours.\n` +
+      `- 40–70%: Optimal range for most field crops.\n` +
+      `- 70–85%: High. Reduce or stop irrigation. Monitor for root issues.\n` +
+      `- Above 85%: Waterlogged. Open drainage channels immediately.\n\n` +
+      `How to conserve soil moisture:\n` +
+      `- Mulching (straw or plastic film) reduces evaporation by 40–60%.\n` +
+      `- Deep ploughing improves water infiltration and storage capacity.\n` +
+      `- Contour bunding on sloped fields prevents runoff.\n\n` +
+      `Signs of waterlogging:\n` +
+      `- Yellowing of lower leaves\n` +
+      `- Foul smell from the soil (anaerobic decomposition)\n` +
+      `- Wilting of plant despite visibly wet soil`,
   },
 
   {
-    tags: ['pest', 'insect', 'aphid', 'whitefly', 'caterpillar', 'borer', 'thrips', 'kida', 'keeda'],
+    tags: ['crop rotation', 'rotation', 'intercrop', 'mixed crop', 'fallow'],
     answer:
-      `🐛 **Pest Control Guide**\n\n` +
-      `**Common Pests:**\n` +
-      `• **Aphids** — Suck sap, cause curling. Apply Imidacloprid or Neem oil.\n` +
-      `• **Whitefly** — Spread viral diseases. Use Yellow sticky traps + Thiamethoxam.\n` +
-      `• **Stem Borer** (Rice) — Dead hearts in tillering. Apply Cartap Hydrochloride.\n` +
-      `• **American Bollworm** (Cotton) — Damages bolls. Apply Emamectin Benzoate.\n` +
-      `• **Thrips** — Silver streaks on leaves. Apply Spinosad.\n` +
-      `• **Termites** — Attack roots. Drench with Chlorpyrifos at root zone.\n\n` +
-      `**Organic/IPM Methods:**\n` +
-      `• Neem oil spray (5ml/L) — effective for soft-bodied insects\n` +
-      `• Yellow/Blue sticky traps — for whitefly, thrips\n` +
-      `• Light traps — for moths (1 trap per acre)\n` +
-      `• Pheromone traps — for bollworms\n\n` +
-      `💡 Never spray insecticides during flowering — kills pollinators.`,
+      `Crop Rotation and Intercropping\n\n` +
+      `Why practice crop rotation:\n` +
+      `- Breaks pest and disease cycles that build up under monoculture.\n` +
+      `- Legumes in rotation fix atmospheric nitrogen, reducing fertilizer cost by 20–30%.\n` +
+      `- Improves soil structure and organic matter content.\n\n` +
+      `Recommended rotation sequences:\n` +
+      `- Rice → Wheat → Legume (standard rotation in North India)\n` +
+      `- Maize → Wheat → Groundnut\n` +
+      `- Cotton → Wheat → Moong\n` +
+      `- Sugarcane → Wheat → Moong\n\n` +
+      `Effective intercropping combinations:\n` +
+      `- Maize + Cowpea: Cowpea fixes nitrogen and provides ground cover.\n` +
+      `- Cotton + Moong: Moong is harvested before cotton reaches full canopy.\n` +
+      `- Sugarcane + Potato or Onion: Efficient use of inter-row space.\n\n` +
+      `General rule: Always follow a cereal crop with a legume to naturally replenish soil nitrogen.`,
+  },
+
+  // ── Diseases ──────────────────────────────────────────────────────────────────
+  {
+    tags: ['disease', 'fungal', 'blight', 'fungus', 'rust', 'mildew', 'rot', 'leaf spot', 'infection'],
+    answer:
+      `Common Fungal Diseases and Management\n\n` +
+      `Major fungal diseases:\n\n` +
+      `- Late Blight (Potato/Tomato): Grey-brown water-soaked lesions. Apply Metalaxyl + Mancozeb at 2.5 g/L.\n` +
+      `- Powdery Mildew: White powdery coating on leaves. Apply Sulfur 80 WP or Hexaconazole 5 EC.\n` +
+      `- Rust (Wheat/Soybean): Orange or brown pustules on leaves. Apply Propiconazole 25 EC at 1 ml/L.\n` +
+      `- Downy Mildew: Yellow angular patches on upper leaf surface. Apply Cymoxanil + Mancozeb.\n` +
+      `- Stem Rot: Water-soaked lesions at stem base. Use Trichoderma viride as soil treatment.\n\n` +
+      `Preventive practices:\n` +
+      `- Maintain proper plant spacing for air circulation.\n` +
+      `- Avoid overhead irrigation; use drip where possible.\n` +
+      `- Apply Trichoderma viride 2.5 kg/ha mixed in compost as soil treatment before sowing.\n\n` +
+      `High-risk environmental conditions:\n` +
+      `Humidity above 80% combined with temperatures of 20–25°C and prolonged leaf wetness create ideal conditions for fungal outbreaks.\n\n` +
+      `Preventive spray: Bordeaux mixture (1%) applied before the monsoon season provides broad-spectrum fungal protection.`,
   },
 
   {
-    tags: ['neem', 'neem oil', 'organic pest', 'bio pesticide'],
+    tags: ['pest', 'insect', 'aphid', 'whitefly', 'caterpillar', 'borer', 'thrips', 'kida', 'keeda', 'bug'],
     answer:
-      `🌿 **Neem-Based Pest Control**\n\n` +
-      `**Neem Products:**\n` +
-      `• **Neem Oil (5000 ppm):** 5ml/L water — spray every 7 days\n` +
-      `• **NSKE (Neem Seed Kernel Extract):** 50g/L — excellent for sucking pests\n` +
-      `• **Neem Cake:** 200kg/ha in soil — protects roots from nematodes\n\n` +
-      `**Effective Against:**\n` +
-      `• Aphids, Whitefly, Mites, Thrips, Caterpillars\n` +
-      `• Soil nematodes, Termites\n\n` +
-      `**Preparation:**\n` +
-      `• Crush 500g neem seeds, soak in 10L water overnight\n` +
-      `• Filter and spray on plants in early morning\n` +
-      `• Add 2–3ml soap solution as sticker\n\n` +
-      `💡 Neem works as repellent + disrupts insect growth hormone — safer than chemicals.`,
+      `Pest Identification and Control\n\n` +
+      `Common pests and recommended treatments:\n\n` +
+      `- Aphids: Cluster on tender shoots and suck sap, causing leaf curling. Apply Imidacloprid 17.8 SL at 0.5 ml/L or Neem oil 5 ml/L.\n` +
+      `- Whitefly: Transmits viral diseases. Use yellow sticky traps + Thiamethoxam 25 WG at 0.3 g/L.\n` +
+      `- Stem Borer (Rice): Dead heart symptom during tillering. Apply Cartap Hydrochloride 50 SP.\n` +
+      `- Bollworm (Cotton): Damages bolls. Apply Emamectin Benzoate 5 SG at 0.5 g/L.\n` +
+      `- Thrips: Causes silver streaking on leaves and fruit scarring. Apply Spinosad 45 SC at 0.3 ml/L.\n` +
+      `- Termites: Attack roots and stems at soil level. Drench with Chlorpyrifos 20 EC at root zone.\n\n` +
+      `Integrated Pest Management (IPM) approaches:\n` +
+      `- Yellow or blue sticky traps for monitoring and mass trapping.\n` +
+      `- Light traps (1 per acre) for moth species.\n` +
+      `- Pheromone traps for bollworms and fruit borers.\n` +
+      `- Neem oil spray (5 ml/L) every 7 days as a preventive measure.\n\n` +
+      `Important: Do not apply insecticides during the flowering stage as this harms pollinators and reduces fruit set.`,
   },
 
-  // ── Temperature & Weather ────────────────────────────────────────────────────
+  // ── Temperature & Conditions ──────────────────────────────────────────────────
   {
-    tags: ['temperature', 'heat', 'hot', 'cold', 'frost', 'garmi', 'sardi', 'tanman'],
+    tags: ['temperature', 'heat stress', 'heat', 'hot', 'cold', 'frost', 'garmi', 'sardi'],
     answer:
-      `🌡️ **Temperature Effects on Crops**\n\n` +
-      `**Optimal Temperature Ranges:**\n` +
-      `• Rice: 25–35°C | Wheat: 10–25°C | Maize: 25–30°C\n` +
-      `• Tomato: 20–27°C | Potato: 15–25°C | Onion: 13–24°C\n\n` +
-      `**Heat Stress (>38°C):**\n` +
-      `• Pollen sterility in cereals → Yield loss\n` +
-      `• Flower/fruit drop in vegetables\n` +
-      `• Actions: Irrigate at night, apply potassium spray, provide shade nets\n\n` +
-      `**Cold/Frost Protection (<5°C):**\n` +
-      `• Light irrigation before frost — forms protective ice film\n` +
-      `• Smoke/foggers in the field overnight\n` +
-      `• Spray 0.1% Thiourea or 2% Potassium Nitrate\n\n` +
-      `**Based on your sensor reading:** If temp > 38°C, increase irrigation frequency.\n\n` +
-      `💡 Night temperatures matter more than day temps for grain filling in wheat.`,
-  },
-
-  {
-    tags: ['humidity', 'aardrata', 'humid', 'dry air'],
-    answer:
-      `💧 **Humidity Effects on Crops**\n\n` +
-      `**Optimal Humidity Ranges:**\n` +
-      `• Most crops: 50–75% relative humidity\n` +
-      `• High-value vegetables: 65–80%\n\n` +
-      `**High Humidity (>80%):**\n` +
-      `• Increases fungal disease risk (blight, mildew, rust)\n` +
-      `• Reduces pollination efficiency\n` +
-      `• Actions: Improve air circulation, avoid evening irrigation, apply fungicide preventively\n\n` +
-      `**Low Humidity (<30%):**\n` +
-      `• Increases transpiration → moisture stress\n` +
-      `• Tip burn in leafy vegetables\n` +
-      `• Actions: Increase irrigation frequency, apply mulch, use shade nets\n\n` +
-      `💡 Sprinkler irrigation increases local humidity by 5–10% — useful in dry regions.`,
-  },
-
-  // ── Greenhouse / Modern Farming ──────────────────────────────────────────────
-  {
-    tags: ['greenhouse', 'polyhouse', 'protected cultivation', 'shade net', 'tunnel'],
-    answer:
-      `🏠 **Greenhouse / Polyhouse Farming**\n\n` +
-      `**Benefits:**\n` +
-      `• Year-round production regardless of season\n` +
-      `• 3–5x higher yield per unit area\n` +
-      `• Up to 80% water savings with drip\n` +
-      `• No dependency on monsoon\n\n` +
-      `**Setup Cost:** ₹700–1200/sqm for medium-tech polyhouse\n` +
-      `**Subsidy:** 50–65% under National Horticulture Mission\n\n` +
-      `**Best Crops for Polyhouse:**\n` +
-      `• Tomato, Capsicum (Bell Pepper), Cucumber\n` +
-      `• Rose, Gerbera, Carnation (flowers)\n` +
-      `• Lettuce, Spinach (leafy greens)\n\n` +
-      `**Key Parameters to Control:**\n` +
-      `• Temperature: 18–30°C\n` +
-      `• Humidity: 60–70%\n` +
-      `• CO2: 400–1000 ppm\n\n` +
-      `💡 Fog cooling systems reduce polyhouse temperature by 8–10°C in summer.`,
+      `Temperature Management for Crops\n\n` +
+      `Optimal temperature ranges:\n` +
+      `- Rice: 25–35°C | Wheat: 10–25°C | Maize: 25–30°C\n` +
+      `- Tomato: 20–27°C | Potato: 15–25°C | Onion: 13–24°C\n\n` +
+      `Managing heat stress (above 38°C):\n` +
+      `- Irrigate in the evening to cool the root zone.\n` +
+      `- Apply 0.5% Potassium Nitrate foliar spray to reduce heat stress.\n` +
+      `- Use shade nets (30–50% shade intensity) for vegetable crops.\n` +
+      `- Avoid any field operations between 11 AM and 3 PM.\n\n` +
+      `Frost protection (below 5°C):\n` +
+      `- Apply a light irrigation just before an expected frost — the heat released during water freezing protects plants.\n` +
+      `- Use frost cloth or straw mulch to cover sensitive crops overnight.\n` +
+      `- Spray 0.1% Thiourea or 2% Potassium Nitrate the evening before expected frost.\n\n` +
+      `Note: Night temperatures are more critical than daytime temperatures for grain filling in wheat and rice.`,
   },
 
   {
-    tags: ['hydroponics', 'hydroponic', 'soilless', 'water culture', 'nft'],
+    tags: ['humidity', 'humid', 'aardrata', 'dry air'],
     answer:
-      `🌊 **Hydroponics — Soilless Farming**\n\n` +
-      `**What is Hydroponics?**\n` +
-      `Crops grown in nutrient-rich water solution without soil.\n\n` +
-      `**Benefits:**\n` +
-      `• 90% less water than soil farming\n` +
-      `• 3–4x faster growth\n` +
-      `• No weeds, no soil-borne diseases\n` +
-      `• Can be done in urban areas/rooftops\n\n` +
-      `**Systems:**\n` +
-      `• NFT (Nutrient Film Technique) — lettuce, herbs\n` +
-      `• Deep Water Culture — fast growing leafy greens\n` +
-      `• Drip system — tomato, cucumber, capsicum\n\n` +
-      `**Best Crops:** Lettuce, Spinach, Tomato, Cucumber, Herbs (Basil, Mint)\n\n` +
-      `**Nutrient Solution:** EC 1.5–2.5 mS/cm, pH 5.5–6.5\n\n` +
-      `💡 Hydroponics produces 8–10 kg lettuce/sqm vs 2–3 kg in soil.`,
+      `Humidity Effects on Crops\n\n` +
+      `Optimal relative humidity for most field crops: 50–75%\n\n` +
+      `High humidity (above 80%):\n` +
+      `- Increases risk of fungal diseases such as blight, rust, and powdery mildew.\n` +
+      `- Reduces pollination efficiency and pollen viability.\n` +
+      `- Recommended actions: Improve inter-row air circulation, switch to drip irrigation (avoid wetting foliage), apply fungicide preventively.\n\n` +
+      `Low humidity (below 30%):\n` +
+      `- Increases transpiration rate, leading to moisture stress even when soil is adequately watered.\n` +
+      `- Can cause tip burn in leafy vegetables.\n` +
+      `- Recommended actions: Increase irrigation frequency, apply mulch, use shade nets during peak afternoon hours.\n\n` +
+      `Note: Sprinkler irrigation raises local humidity by 5–10% and can be beneficial in dry, arid regions.`,
   },
 
-  // ── General Agriculture ──────────────────────────────────────────────────────
+  // ── Modern Farming ────────────────────────────────────────────────────────────
   {
-    tags: ['seed', 'seedling', 'nursery', 'germination', 'seed treatment', 'beej'],
+    tags: ['greenhouse', 'polyhouse', 'protected cultivation', 'shade net', 'tunnel farming'],
     answer:
-      `🌱 **Seed Selection & Treatment**\n\n` +
-      `**Good Seed Selection:**\n` +
-      `• Use certified seeds from government/reputed companies\n` +
-      `• Float test: soak in water — good seeds sink\n` +
-      `• Use seeds from current year (avoid old stock)\n\n` +
-      `**Seed Treatment (before sowing):**\n` +
-      `• Fungicide: Thiram or Carbendazim 2g/kg seed\n` +
-      `• Bio-agent: Trichoderma 5g/kg seed\n` +
-      `• Bio-fertilizer: Rhizobium/PSB coating for legumes\n\n` +
-      `**Nursery Tips:**\n` +
-      `• Use cocopeat + soil + compost (1:1:1 ratio)\n` +
-      `• Water nursery twice daily\n` +
-      `• Harden seedlings 7 days before transplanting (reduce watering)\n\n` +
-      `💡 Seed priming in water for 6–8 hours improves germination by 20–30%.`,
+      `Greenhouse and Polyhouse Farming\n\n` +
+      `Key benefits:\n` +
+      `- Year-round crop production, independent of seasons or monsoon.\n` +
+      `- 3–5 times higher yield per unit area compared to open-field cultivation.\n` +
+      `- Up to 80% water savings when drip irrigation is used inside.\n\n` +
+      `Approximate setup cost: Rs. 700–1200 per square meter for medium-tech polyhouse\n` +
+      `Government subsidy: 50–65% under the National Horticulture Mission (NHM)\n\n` +
+      `Best crops for polyhouse:\n` +
+      `- Vegetables: Tomato, Capsicum (Bell Pepper), Cucumber\n` +
+      `- Flowers: Rose, Gerbera, Carnation\n` +
+      `- Leafy greens: Lettuce, Spinach, Basil\n\n` +
+      `Environmental parameters to maintain:\n` +
+      `- Temperature: 18–30°C\n` +
+      `- Relative humidity: 60–70%\n` +
+      `- CO2 concentration: 400–1000 ppm\n\n` +
+      `Note: Fog-cooling systems can reduce polyhouse temperature by 8–10°C during summer months.`,
   },
 
+  // ── Government & General ──────────────────────────────────────────────────────
   {
-    tags: ['harvest', 'harvesting', 'yield', 'katai', 'collection'],
+    tags: ['government scheme', 'subsidy', 'pm kisan', 'fasal bima', 'crop insurance', 'kcc', 'loan', 'yojana'],
     answer:
-      `🌾 **Harvesting Guide**\n\n` +
-      `**Right Time to Harvest:**\n` +
-      `• Wheat: Grains hard, moisture < 14%, straw yellow\n` +
-      `• Rice: 85% panicle yellowing, 25–30 days after flowering\n` +
-      `• Maize: Silks brown, kernel dented, husk dry\n` +
-      `• Tomato: 60–80% red colour for market\n` +
-      `• Onion: 50% tops fallen over\n\n` +
-      `**Post-Harvest Tips:**\n` +
-      `• Dry grains to < 14% moisture before storage\n` +
-      `• Use hermetic bags for grain storage (prevents pest)\n` +
-      `• Cure root vegetables (onion, potato) before storage\n\n` +
-      `**Yield Loss Prevention:**\n` +
-      `• Delayed harvest: 1–2% loss per week in wheat\n` +
-      `• Proper threshing reduces grain breakage\n\n` +
-      `💡 Mechanical harvesting reduces post-harvest loss by 3–5% vs manual cutting.`,
+      `Government Schemes for Farmers\n\n` +
+      `Major schemes and benefits:\n\n` +
+      `- PM-KISAN: Rs. 6000 per year (paid in 3 installments) to small and marginal farmers with less than 2 hectares land.\n` +
+      `- PMFBY (Crop Insurance): Premium of 1.5–2% for Kharif crops; government bears remaining cost.\n` +
+      `- Kisan Credit Card (KCC): Short-term crop loan at 4% interest (up to Rs. 3 lakh).\n` +
+      `- Soil Health Card: Free soil testing every 3 years with crop-wise fertilizer recommendations.\n` +
+      `- PMKSY (Irrigation Scheme): 50–90% subsidy on drip and sprinkler irrigation systems.\n` +
+      `- eNAM (Electronic Market): Online trading portal for better market price discovery.\n\n` +
+      `How to apply:\n` +
+      `- Visit your nearest Common Service Centre (CSC) or Krishi Vigyan Kendra (KVK).\n` +
+      `- For PM-KISAN: Register at pmkisan.gov.in with Aadhaar number and bank account.\n` +
+      `- For PMFBY: Apply through your bank or insurance company before crop sowing deadline.`,
   },
 
   {
-    tags: ['storage', 'grain storage', 'godown', 'silo', 'weevil', 'storage pest'],
+    tags: ['agrisense', 'how to use', 'what is agrisense', 'features', 'help', 'guide', 'about'],
     answer:
-      `🏪 **Grain Storage & Post-Harvest**\n\n` +
-      `**Storage Conditions:**\n` +
-      `• Grain moisture: < 14% (critical!)\n` +
-      `• Temperature: < 25°C\n` +
-      `• Humidity: < 70% RH\n\n` +
-      `**Common Storage Pests:**\n` +
-      `• Weevils, Grain borers → Apply Aluminum Phosphide tablets\n` +
-      `• Rats → Use rodenticide or mechanical traps\n\n` +
-      `**Safe Storage Methods:**\n` +
-      `• Hermetic bags (PICS bags) — no chemicals needed\n` +
-      `• Clean + dry godown before filling\n` +
-      `• Neem leaf layer at bottom and top\n` +
-      `• Grain spread thickness < 1.5m for air circulation\n\n` +
-      `💡 India loses 4–5% of stored grain to pests — proper storage saves ₹50,000+ per year.`,
+      `About AgriSense\n\n` +
+      `AgriSense is a smart agriculture monitoring system that combines IoT sensors, cloud storage, and AI to help farmers make better decisions.\n\n` +
+      `System components:\n` +
+      `- Live Dashboard: Real-time Temperature, Humidity, and Soil Moisture readings from IoT sensors (ESP32 + DHT11).\n` +
+      `- AI Assistant: Six AI-powered advisory tools using Google Gemini — crop recommendations, fertilizer advice, irrigation scheduling, disease risk assessment, data trend analysis, and this chatbot.\n` +
+      `- Smart Alerts: Automatic detection and notification when any sensor value crosses a safe threshold.\n` +
+      `- Cloud Storage: All sensor readings are stored in Firebase Firestore.\n\n` +
+      `To start streaming sensor data:\n` +
+      `- Real ESP32: Run "python main.py" in the terminal\n` +
+      `- Simulated data: Run "python iot_sender.py" in the terminal\n\n` +
+      `This project covers Problem Statement 7: IoT + Cloud + Deep Learning based Smart Agriculture.`,
+  },
+
+  // ── Seed & Harvest ────────────────────────────────────────────────────────────
+  {
+    tags: ['seed', 'seedling', 'nursery', 'germination', 'seed treatment', 'beej', 'sowing'],
+    answer:
+      `Seed Selection and Treatment\n\n` +
+      `Selecting good quality seed:\n` +
+      `- Use certified seeds from government agencies or reputed companies.\n` +
+      `- Float test: Soak seeds in water for 10 minutes. Healthy seeds sink; discard those that float.\n` +
+      `- Use seeds from the current season — germination rate declines with age.\n\n` +
+      `Seed treatment before sowing:\n` +
+      `1. Fungicide treatment: Thiram or Carbendazim at 2 g per kg of seed.\n` +
+      `2. Bio-agent treatment: Trichoderma viride at 5 g per kg of seed.\n` +
+      `3. Bio-fertilizer coating: Rhizobium or PSB for legume crops.\n\n` +
+      `Nursery preparation:\n` +
+      `- Use cocopeat + soil + compost in a 1:1:1 ratio for nursery trays.\n` +
+      `- Water the nursery twice daily; avoid waterlogging.\n` +
+      `- Harden seedlings for 7 days before transplanting by gradually reducing irrigation.\n\n` +
+      `Tip: Seed priming — soaking seeds in plain water for 6–8 hours before sowing — can improve germination rate and uniformity by 20–30%.`,
   },
 
   {
-    tags: ['government scheme', 'subsidy', 'pm kisan', 'fasal bima', 'insurance', 'loan', 'kcc'],
+    tags: ['harvest', 'harvesting', 'yield', 'katai', 'collection', 'when to harvest'],
     answer:
-      `🏛️ **Government Schemes for Farmers**\n\n` +
-      `**Major Schemes:**\n` +
-      `• **PM-KISAN** — ₹6000/year to small/marginal farmers (3 installments)\n` +
-      `• **PMFBY** — Crop insurance @ 1.5–2% premium for Kharif crops\n` +
-      `• **KCC (Kisan Credit Card)** — Crop loan at 4% interest (up to ₹3 lakh)\n` +
-      `• **Soil Health Card** — Free soil testing every 3 years\n` +
-      `• **PMKSY** — Drip/sprinkler irrigation subsidy 50–90%\n` +
-      `• **eNAM** — Online market portal for better crop prices\n\n` +
-      `**How to Apply:**\n` +
-      `• Visit nearest Common Service Centre (CSC)\n` +
-      `• Or apply online at pmkisan.gov.in, pmfby.gov.in\n\n` +
-      `💡 Register on PM-KISAN portal with Aadhaar — direct benefit transfer to bank.`,
-  },
-
-  {
-    tags: ['agrisense', 'how to use', 'what is', 'features', 'dashboard', 'help', 'guide'],
-    answer:
-      `🌾 **Welcome to AgriSense!**\n\n` +
-      `**What AgriSense does:**\n` +
-      `• 📡 **Live Monitoring** — Real-time Temperature, Humidity & Soil Moisture from IoT sensors\n` +
-      `• 🤖 **AI Assistant** — Gemini AI for crop advice, fertilizer, irrigation recommendations\n` +
-      `• ⚠️ **Smart Alerts** — Automatic alerts when sensor readings cross safe thresholds\n` +
-      `• ☁️ **Cloud Storage** — All data saved in Firebase Firestore\n\n` +
-      `**Pages:**\n` +
-      `• /dashboard — Live sensor data, charts, data table\n` +
-      `• /ai-assistant — 6 AI sections + chatbot\n` +
-      `• /alerts — Historical alerts with filter\n\n` +
-      `**To start IoT data stream:**\n` +
-      `\`python main.py\` → reads ESP32 via USB\n` +
-      `\`python iot_sender.py\` → simulated data for testing\n\n` +
-      `💡 This project covers Problem Statement 7: IoT + Cloud + Deep Learning.`,
+      `Crop Harvesting Guide\n\n` +
+      `Indicators for correct harvest timing:\n` +
+      `- Wheat: Grains are hard and chalky-white; grain moisture below 14%; straw is fully yellow.\n` +
+      `- Rice: 80–85% of the panicle has yellowed; approximately 25–30 days after heading.\n` +
+      `- Maize: Silks are brown and dry; kernel is dented; husk is dry and papery.\n` +
+      `- Tomato: 60–80% surface colour change for market; 90–100% for local sale or processing.\n` +
+      `- Onion: 50% or more tops have naturally fallen over.\n\n` +
+      `Post-harvest handling:\n` +
+      `- Dry all grain crops to below 14% moisture before storage.\n` +
+      `- Use hermetic (airtight) storage bags to prevent insect infestation without chemicals.\n` +
+      `- Cure root and bulb vegetables (onion, potato, garlic) in a well-ventilated area for 7–10 days before storage.\n\n` +
+      `Yield loss factors:\n` +
+      `- Delayed wheat harvest: Approximately 1–1.5% yield loss per day after optimum harvest date.\n` +
+      `- Improper threshing leads to grain breakage and quality downgrade.`,
   },
 ];
 
 // Default response when no keyword matches
 const DEFAULT_RESPONSE =
-  `I'm not sure about that specific question, but I can help you with:\n\n` +
-  `• 🌾 Crops by season (ask "best crops for winter/rainy season")\n` +
-  `• 💊 Fertilizers (ask "which fertilizer for wheat/rice/tomato")\n` +
-  `• 💧 Irrigation (ask "when should I irrigate" or "drip irrigation tips")\n` +
-  `• 🦠 Diseases (ask "how to prevent fungal diseases")\n` +
-  `• 🌱 Soil health (ask "how to improve soil quality")\n` +
-  `• 🏛️ Government schemes (ask "PM-KISAN scheme details")\n\n` +
-  `Try asking in simple words and I'll do my best to help! 🙏`;
+  `I was not able to find a specific answer for that query in my knowledge base.\n\n` +
+  `You may try asking about one of the following topics:\n\n` +
+  `- Crop selection by season (e.g., "which crops to grow in winter season")\n` +
+  `- Fertilizer recommendations (e.g., "how much urea to apply for wheat")\n` +
+  `- Irrigation advice (e.g., "when should I irrigate my field")\n` +
+  `- Disease and pest management (e.g., "how to treat fungal disease in rice")\n` +
+  `- Soil health (e.g., "how to improve acidic soil")\n` +
+  `- Government schemes (e.g., "how to apply for PM-KISAN")\n\n` +
+  `Please rephrase your question and I will do my best to assist.`;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Main export: get fallback response for a given message
 // ─────────────────────────────────────────────────────────────────────────────
 export function getFallbackResponse(message) {
   const msg = (message || '').toLowerCase().trim();
-
   if (!msg) return GREETING_RESPONSE;
 
-  // Check for greeting
-  const isGreeting = GREETING_WORDS.some(g => msg === g || msg.startsWith(g + ' ') || msg.includes(' ' + g));
-  if (isGreeting && msg.length < 40) {
+  // Greeting check — only for short messages that are clearly greetings
+  const isGreeting = GREETING_WORDS.some(
+    g => msg === g || msg.startsWith(g + ' ') || msg.endsWith(' ' + g) || msg === g + '!'
+  );
+  if (isGreeting && msg.length < 35) {
     return GREETING_RESPONSE;
   }
 
-  // Find best matching Q&A (highest keyword match score)
-  let bestMatch = null;
-  let bestScore = 0;
+  // Find best Q&A match by keyword count
+  let best = null;
+  let topScore = 0;
 
   for (const qa of QA) {
-    const score = qa.tags.reduce((acc, tag) => acc + (msg.includes(tag) ? 1 : 0), 0);
-    if (score > bestScore) {
-      bestScore = score;
-      bestMatch = qa;
+    const score = qa.tags.reduce((n, tag) => n + (msg.includes(tag) ? 1 : 0), 0);
+    if (score > topScore) {
+      topScore = score;
+      best = qa;
     }
   }
 
-  if (bestMatch && bestScore > 0) {
-    return bestMatch.answer;
-  }
-
-  return DEFAULT_RESPONSE;
+  return best && topScore > 0 ? best.answer : DEFAULT_RESPONSE;
 }
