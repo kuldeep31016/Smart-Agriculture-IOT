@@ -1,5 +1,5 @@
 // Dashboard Page — Live Sensor Monitoring
-// IoT + Cloud Layer: auto-fetches latest readings every 10 seconds
+// IoT + Cloud Layer: auto-fetches latest readings every 2 seconds
 // Shows sensor cards with min/max, charts, data table, and anomaly alerts
 
 import { useEffect, useState, useCallback } from 'react';
@@ -71,7 +71,7 @@ export default function Dashboard() {
   const fetchData = useCallback(async (silent = false) => {
     try {
       if (!silent) setLoading(true);
-      const data = await getSensorData(20);
+      const data = await getSensorData();
       if (Array.isArray(data) && data.length > 0) {
         setReadings(data);
         setLastUpdate(new Date());
@@ -86,7 +86,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchData();
-    const id = setInterval(() => fetchData(true), 10000); // auto-refresh every 10s
+    const id = setInterval(() => fetchData(true), 2000); // auto-refresh every 2s
     return () => clearInterval(id);
   }, [fetchData]);
 
@@ -129,7 +129,7 @@ export default function Dashboard() {
         <div>
           <h1 className="text-3xl font-extrabold text-agri-primary">Live Sensor Dashboard</h1>
           <p className="text-gray-500 mt-1 text-sm">
-            Auto-refreshes every 10 s
+            Auto-refreshes every 2 s
             {lastUpdate && <span> · Last update: {lastUpdate.toLocaleTimeString()}</span>}
           </p>
         </div>
