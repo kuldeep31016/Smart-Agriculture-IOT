@@ -5,6 +5,7 @@ const NAV_LINKS = [
   { to: '/',             label: 'Home'         },
   { to: '/dashboard',    label: 'Dashboard'    },
   { to: '/ai-assistant', label: 'AI Assistant' },
+  { to: '/predictions',  label: '🔮 AI Predictions' },
   { to: '/alerts',       label: 'Alerts'       },
 ];
 
