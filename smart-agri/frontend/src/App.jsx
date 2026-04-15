@@ -6,7 +6,8 @@ import Landing     from './pages/Landing';
 import Dashboard   from './pages/Dashboard';
 import AIAssistant from './pages/AIAssistant';
 import Alerts      from './pages/Alerts';
-import Predictions from './pages/Predictions';
+import Predictions    from './pages/Predictions';
+import FarmerInsights from './pages/FarmerInsights';
 
 export default function App() {
   return (
@@ -34,7 +35,8 @@ export default function App() {
           <Route path="/dashboard"    element={<Dashboard />} />
           <Route path="/ai-assistant" element={<AIAssistant />} />
           <Route path="/alerts"       element={<Alerts />} />
-          <Route path="/predictions"  element={<Predictions />} />
+          <Route path="/predictions"     element={<Predictions />} />
+          <Route path="/farmer-insights" element={<FarmerInsights />} />
         </Route>
       </Routes>
     </BrowserRouter>
