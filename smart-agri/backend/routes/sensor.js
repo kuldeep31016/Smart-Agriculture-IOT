@@ -8,6 +8,7 @@
 const express = require('express');
 const router  = express.Router();
 const { db, admin } = require('../firebase');
+const SENSOR_COLLECTION = 'sensor_readings';
 
 // ── In-memory fallback (runs when Firebase is not configured) ─────────────────
 const inMemoryStore = [];
@@ -50,18 +51,25 @@ router.post('/sensor-data', async (req, res) => {
       });
     }
 
+    const sensorTimestamp = req.body.timestamp
+      ? new Date(req.body.timestamp)
+      : new Date();
+
     const reading = {
       temperature: parseFloat(temperature.toFixed(1)),
       humidity:    parseFloat(humidity.toFixed(1)),
       moisture:    parseFloat(moisture.toFixed(1)),
-      timestamp:   new Date().toISOString(),
+      timestamp:   (isNaN(sensorTimestamp.getTime()) ? new Date() : sensorTimestamp).toISOString(),
     };
 
     // Cloud Storage: save to Firebase Firestore
     if (db) {
-      const docRef = await db.collection('sensor_readings').add({
-        ...reading,
+      const docRef = await db.collection(SENSOR_COLLECTION).add({
+        temperature: reading.temperature,
+        humidity: reading.humidity,
+        moisture: reading.moisture,
         timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        sensorTimestamp: reading.timestamp,
       });
       return res.status(201).json({ success: true, id: docRef.id, ...reading, storage: 'firebase' });
     }
@@ -94,7 +102,7 @@ router.get('/sensor-data', async (req, res) => {
 
     if (db) {
       const snapshot = await db
-        .collection('sensor_readings')
+        .collection(SENSOR_COLLECTION)
         .orderBy('timestamp', 'desc')
         .limit(limit)
         .get();
@@ -104,7 +112,7 @@ router.get('/sensor-data', async (req, res) => {
         temperature: doc.data().temperature,
         humidity:    doc.data().humidity,
         moisture:    doc.data().moisture ?? doc.data().soil,
-        timestamp:   doc.data().timestamp?.toDate?.()?.toISOString() || new Date().toISOString(),
+        timestamp:   doc.data().timestamp?.toDate?.()?.toISOString() || doc.data().sensorTimestamp || new Date().toISOString(),
       }));
       return res.json(readings);
     }
