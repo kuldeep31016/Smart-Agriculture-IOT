@@ -1,28 +1,20 @@
-import { Toaster } from 'react-hot-toast';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
+import { Outlet } from 'react-router-dom';
+import Navbar       from '../components/Navbar';
+import FloatingChat from '../components/FloatingChat';
 
-function MainLayout({ children }) {
+export default function MainLayout() {
   return (
-    <div className="min-h-screen flex flex-col bg-agri-white">
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          style: {
-            background: '#f0faf4',
-            color: '#1b4332',
-            border: '1px solid #52b788',
-            fontWeight: 500,
-          },
-          success: { iconTheme: { primary: '#2d6a4f', secondary: '#d8f3dc' } },
-        }}
-      />
-
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
-      <main className="flex-1">{children}</main>
-      <Footer />
+      <main className="flex-1">
+        <Outlet />
+      </main>
+      <footer className="bg-agri-dark text-agri-frost text-center py-4 text-sm">
+        🌾 AgriSense v2.0 — Problem Statement 7: IoT + Cloud + Deep Learning
+      </footer>
+
+      {/* Global AI chatbot — visible on all pages */}
+      <FloatingChat />
     </div>
   );
 }
-
-export default MainLayout;
