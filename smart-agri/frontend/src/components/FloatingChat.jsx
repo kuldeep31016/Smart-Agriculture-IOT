@@ -3,9 +3,9 @@
 // Uses Gemini API with automatic fallback to local agriculture Q&A
 
 import { useState, useEffect, useRef } from 'react';
-import { callGemini }          from '../services/gemini';
+import { callGemini } from '../services/gemini';
 import { getFallbackResponse } from '../services/chatFallback';
-import { getSensorData }       from '../services/api';
+import { getSensorData } from '../services/api';
 
 // Builds the system context prompt with sensor readings
 function buildPrompt(t, h, m, userMsg) {
@@ -20,15 +20,22 @@ function buildPrompt(t, h, m, userMsg) {
 }
 
 export default function FloatingChat() {
-  const [isOpen,   setIsOpen]   = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
-  const [input,    setInput]    = useState('');
-  const [loading,  setLoading]  = useState(false);
-  const [sensor,   setSensor]   = useState({ t: '—', h: '—', m: '—' });
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [sensor, setSensor] = useState({ t: '—', h: '—', m: '—' });
   const [hasUnread, setHasUnread] = useState(false);
 
-  const bottomRef  = useRef(null);
-  const inputRef   = useRef(null);
+  const bottomRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // Listen for custom event to open chat from anywhere
+  useEffect(() => {
+    const handleOpenChat = () => setIsOpen(true);
+    window.addEventListener('open-agrisense-chat', handleOpenChat);
+    return () => window.removeEventListener('open-agrisense-chat', handleOpenChat);
+  }, []);
 
   // Fetch latest sensor reading for context
   useEffect(() => {
@@ -38,12 +45,12 @@ export default function FloatingChat() {
           const r = data[0];
           setSensor({
             t: r.temperature ?? '—',
-            h: r.humidity    ?? '—',
+            h: r.humidity ?? '—',
             m: r.moisture ?? r.soil ?? '—',
           });
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   // Auto-scroll to bottom on new message
@@ -142,11 +149,10 @@ export default function FloatingChat() {
               <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} items-end gap-1`}>
                 {msg.role === 'ai' && <span className="text-base shrink-0 mb-0.5">🤖</span>}
                 <div
-                  className={`max-w-[82%] px-3 py-2 rounded-2xl text-xs leading-relaxed whitespace-pre-wrap ${
-                    msg.role === 'user'
+                  className={`max-w-[82%] px-3 py-2 rounded-2xl text-xs leading-relaxed whitespace-pre-wrap ${msg.role === 'user'
                       ? 'bg-agri-primary text-white rounded-br-sm'
                       : 'bg-gray-100 text-gray-800 rounded-bl-sm border border-gray-200'
-                  }`}
+                    }`}
                 >
                   {msg.text}
                 </div>
@@ -196,11 +202,10 @@ export default function FloatingChat() {
       <button
         onClick={() => setIsOpen(prev => !prev)}
         aria-label={isOpen ? 'Close AI chat' : 'Open AI chat'}
-        className={`fixed bottom-4 right-4 z-50 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-2xl transition-all duration-300 hover:scale-110 active:scale-95 ${
-          isOpen
+        className={`fixed bottom-4 right-4 z-50 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-2xl transition-all duration-300 hover:scale-110 active:scale-95 ${isOpen
             ? 'bg-gray-600 text-white rotate-0'
             : 'bg-agri-primary text-white hover:bg-agri-medium'
-        }`}
+          }`}
       >
         {isOpen ? (
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
