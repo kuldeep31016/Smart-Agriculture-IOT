@@ -408,7 +408,7 @@ export default function Landing() {
               <div className="flex flex-col gap-3">
                 <span className="text-[#fde047] text-sm font-medium cursor-pointer hover:underline">support@agrisense.com</span>
                 <span className="text-[#fde047] text-sm font-medium flex items-center gap-2 cursor-pointer hover:underline">
-                  +1 (555) 123-4567
+                  +91 8002546789
                 </span>
               </div>
             </div>
