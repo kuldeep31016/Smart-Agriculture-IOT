@@ -158,9 +158,12 @@ export default function Landing() {
                 <p className="text-[10px] text-white/90 font-medium">Trusted by 50K</p>
               </div>
             </div>
-            <Link to="/alerts" className="block w-full py-2.5 rounded-lg bg-[#fde047] text-black text-center font-bold text-[11px] hover:bg-[#facc15] transition-colors leading-tight">
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('open-agrisense-chat'))}
+              className="block w-full py-2.5 rounded-lg bg-[#fde047] text-black text-center font-bold text-[11px] hover:bg-[#facc15] transition-colors leading-tight"
+            >
               24/7 Tech Support
-            </Link>
+            </button>
           </div>
 
         </div>
