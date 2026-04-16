@@ -1,6 +1,5 @@
 import { Outlet } from 'react-router-dom';
-import Navbar       from '../components/Navbar';
-import FloatingChat from '../components/FloatingChat';
+import Navbar from '../components/Navbar';
 
 export default function MainLayout() {
   return (
@@ -12,9 +11,6 @@ export default function MainLayout() {
       <footer className="bg-agri-dark text-agri-frost text-center py-4 text-sm">
         🌾 AgriSense v2.0 — Problem Statement 7: IoT + Cloud + Deep Learning
       </footer>
-
-      {/* Global AI chatbot — visible on all pages */}
-      <FloatingChat />
     </div>
   );
 }
