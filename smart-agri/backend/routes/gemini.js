@@ -10,7 +10,46 @@ const express = require('express');
 const router  = express.Router();
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_URL     = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+const GEMINI_MODELS = [
+  'gemini-2.0-flash',
+  'gemini-1.5-flash',
+  'gemini-1.5-flash-8b',
+];
+
+async function generateWithModel(model, prompt) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+  const response = await fetch(`${url}?key=${GEMINI_API_KEY}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 1024,
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    const error = new Error(errData?.error?.message || `Gemini API error (${response.status})`);
+    error.status = response.status;
+    error.model = model;
+    throw error;
+  }
+
+  const data = await response.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+  if (!text) {
+    const error = new Error('Empty response from Gemini');
+    error.status = 500;
+    error.model = model;
+    throw error;
+  }
+
+  return text;
+}
 
 router.post('/gemini', async (req, res) => {
   try {
@@ -26,34 +65,26 @@ router.post('/gemini', async (req, res) => {
       });
     }
 
-    const response = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature:     0.7,
-          maxOutputTokens: 1024,
-        },
-      }),
+    const errors = [];
+
+    for (const model of GEMINI_MODELS) {
+      try {
+        const text = await generateWithModel(model, prompt);
+        return res.json({ response: text, model });
+      } catch (error) {
+        errors.push({ model: error.model || model, status: error.status || 500, message: error.message });
+
+        // Continue trying other models for quota/rate-limit/service failures.
+        if (error.status && error.status < 500 && error.status !== 429) {
+          continue;
+        }
+      }
+    }
+
+    return res.status(503).json({
+      error: 'Gemini API unavailable for all configured models',
+      details: errors,
     });
-
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      return res.status(response.status).json({
-        error:   'Gemini API error',
-        details: errData?.error?.message || 'Unknown error',
-      });
-    }
-
-    const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!text) {
-      return res.status(500).json({ error: 'Empty response from Gemini' });
-    }
-
-    res.json({ response: text });
 
   } catch (error) {
     console.error('POST /gemini error:', error);
