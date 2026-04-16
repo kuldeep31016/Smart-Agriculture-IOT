@@ -1,11 +1,8 @@
-// Gemini 2.0 Flash — AI / Deep Learning Layer
+// Gemini AI — AI / Deep Learning Layer
 // Problem Statement 7: Deep Learning component
-// Direct frontend call using VITE_GEMINI_API_KEY, with backend proxy fallback
+// Prefer backend proxy so the API key stays server-side and model fallback stays centralized.
 
 import { callGeminiViaBackend } from './api';
-
-const GEMINI_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
 // System-level persona — injected into every request so Gemini always behaves consistently
 const SYSTEM_INSTRUCTION =
@@ -16,30 +13,37 @@ const SYSTEM_INSTRUCTION =
   'If the user writes in Hindi or uses Hindi words, respond in simple English but acknowledge their language.';
 
 export async function callGemini(prompt) {
-  // Use frontend key directly if configured
-  if (GEMINI_KEY && GEMINI_KEY !== 'your_gemini_api_key_here') {
-    const response = await fetch(`${GEMINI_URL}?key=${GEMINI_KEY}`, {
-      method:  'POST',
+  try {
+    // Default path: backend proxy. This keeps the API key out of the browser and
+    // lets the server retry multiple Gemini models if one is quota-limited.
+    return await callGeminiViaBackend(prompt);
+  } catch (backendErr) {
+    const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+
+    // Last-resort local fallback for development if the backend is unavailable.
+    if (!geminiKey || geminiKey === 'your_gemini_api_key_here') {
+      throw backendErr;
+    }
+
+    const response = await fetch(`${geminiUrl}?key=${geminiKey}`, {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        // System instruction keeps persona consistent across all calls
         systemInstruction: {
           parts: [{ text: SYSTEM_INSTRUCTION }],
         },
-        contents: [
-          { role: 'user', parts: [{ text: prompt }] },
-        ],
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
         generationConfig: {
-          temperature:     0.7,
+          temperature: 0.7,
           maxOutputTokens: 1024,
-          topP:            0.9,
+          topP: 0.9,
         },
       }),
     });
 
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
-      // Surface a clean error so callers can decide to fall back
       throw new Error(err?.error?.message || `Gemini API error (${response.status})`);
     }
 
@@ -48,7 +52,4 @@ export async function callGemini(prompt) {
     if (!text) throw new Error('Empty response from Gemini');
     return text;
   }
-
-  // No frontend key → route through backend proxy (backend uses GEMINI_API_KEY env var)
-  return callGeminiViaBackend(prompt);
 }
